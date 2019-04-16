@@ -23,7 +23,7 @@
         <button type="button" id='btnStartGame' class="btn btn-primary">Start Game</button>
     </div>
     <div class="col-md-8" >
-        <div id="grid" style="boder: 1px solid #333"></div>
+        <div id="grid" ></div>
     </div>
 </div>
 
@@ -31,48 +31,16 @@
 {
   <script src="~/lib/signalr/dist/browser/signalr.js"></script>
   <script>
-        function getGridData() {
-            var data = new Array();
-            var xpos = 1; //starting xpos and ypos at 1 so the stroke will show when we make the grid below
-            var ypos = 1;
-            var width = 35;
-            var height = 35;
+        var gridWidth = 500;
+        var gridHeight = 500;
+        var cellSize;
 
-            // iterate for rows 
-            for (var row = 0; row < 10; row++) {
-                data.push( new Array() );
-
-                // iterate for cells/columns inside rows
-                for (var column = 0; column < 10; column++) {
-                    data[row].push({
-                        x: xpos,
-                        y: ypos,
-                        width: width,
-                        height: height
-                    })
-                    // increment the x position. I.e. move it over by 50 (width variable)
-                    xpos += width;
-                }
-                // reset the x position after a row is complete
-                xpos = 1;
-                // increment the y position for the next row. Move it down 50 (height variable)
-                ypos += height; 
-            }
-            return data;
-        }
-
-        function createGrind() {
-            var gridData = getGridData();                
-
-            // Create Grid
-            var grid = d3.select("#grid")
-                .append("svg")
-                .attr("width","500px")
-                .attr("height","500px");
+        function drawGrid(data) {            
+            var grid = d3.select("#grid svg");
 
             // Add rows
             var row = grid.selectAll(".row")
-                .data(gridData)
+                .data(data)
                 .enter().append("g")
                 .attr("class", "row");
 
@@ -85,7 +53,7 @@
                 .attr("y", function(d) { return d.y; })
                 .attr("width", function(d) { return d.width; })
                 .attr("height", function(d) { return d.height; })
-                .style("fill", "#fff")
+                .style("fill", function(d){ return d.alive ? '#666' : '#fff' })
                 .style("stroke", "#222");
         }
 
@@ -96,18 +64,48 @@
         function handleStartGameMsgReceived(user, message) {            
         }
 
+        function handleUpdateGameState(message){            
+            var width = cellSize; 
+            var height = cellSize;
+
+            var ypos = 0;
+            var xpos = 0;
+            var gridData = message.map(function(r){ 
+                xpos = 0;
+                ypos += height;
+                return r.map(function(c){                    
+                    xpos += width;                    
+                    return {
+                        x: xpos - width,
+                        y: ypos - height,
+                        width: width,
+                        height: height,
+                        alive: c.isAlive
+                    };                    
+                });                
+            });
+
+            drawGrid(gridData);
+        }
+
         function handleOnClickStartGame(){             
             $(this).prop('disabled', true);
 
             var connection = new signalR.HubConnectionBuilder().withUrl("/gameHub").build()
             connection.on("StartGameMsgReceived", handleStartGameMsgReceived);
+            connection.on("UpdateGameState", handleUpdateGameState);
+            
 
             connection.start()
-                .then(function(){                              
+                .then(function(){ 
+                    var rows = +$('#rows').val();     
+                    var cols = +$('#cols').val();
+                    var gens = +$('#gens').val();
+                    cellSize = Math.max(gridWidth, gridHeight) / Math.max(rows, cols);
                     var message = {
-                        RowCount: $('#rows').val(),
-                        ColumnCount: $('#cols').val(),
-                        GenCount: $('#gens').val()
+                        RowCount: rows ,
+                        ColumnCount: cols,
+                        GenCount: gens
                     };
                     connection.invoke("StartGame", message).catch(handleSigErr);                
                 })
@@ -115,8 +113,16 @@
         }
 
         $(function(){
-            createGrind();
-            $('#btnStartGame').click(handleOnClickStartGame);
+            //createGrind();
+            $('#btnStartGame').click(handleOnClickStartGame);4
+
+            // Create Grid
+            var grid = d3.select("#grid")
+                .append("svg")
+                .attr("width", gridWidth + "px")
+                .attr("height", gridHeight + "px")
+                .style("border", "1px solid #666");
+
         });
 
   </script>

@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using Ozow.GameOfLife.Domain.DomainServices;
 
 namespace Ozow.GameOfLife.Domain.DomainModel
 {
@@ -6,9 +8,8 @@ namespace Ozow.GameOfLife.Domain.DomainModel
     {
         int RowCount { get; }
         int ColCount { get; }        
-
-        IList<IList<Cell>> GameHistory { get; }
-        IList<Cell> GameState { get; }
+        
+        IList<IList<ICell>> GameState { get; }
 
         void StartGame();
         void NextGen();
@@ -16,16 +17,21 @@ namespace Ozow.GameOfLife.Domain.DomainModel
 
     public class GameOfLife : IGameOfLife
     {
+        #region Dependencies
+        private readonly IGameEventEmitter _eventEmitter;
+        #endregion
+
         #region public Properties
         public int RowCount { get; private set; }
-        public int ColCount { get; private set; }        
-        public IList<IList<Cell>> GameHistory => throw new System.NotImplementedException();
-        public IList<Cell> GameState => throw new System.NotImplementedException();
+        public int ColCount { get; private set; }                
+        public IList<IList<ICell>> GameState { get; private set; }        
         #endregion
 
         #region Constructor
-        public GameOfLife(int rowCount, int columnCount)
-        {            
+        public GameOfLife(IGameEventEmitter eventEmitter, int rowCount, int columnCount)
+        {
+            _eventEmitter = eventEmitter;
+
             this.RowCount = rowCount;
             this.ColCount = columnCount;
         }
@@ -39,7 +45,25 @@ namespace Ozow.GameOfLife.Domain.DomainModel
 
         public void StartGame()
         {
-            throw new System.NotImplementedException();
+            this.GameState = _crateInitGameState();  
+            _eventEmitter.NewGameStateEvent(this.GameState);
+        }
+        #endregion
+
+        #region Private Methods
+        private IList<IList<ICell>> _crateInitGameState()
+        {
+            var mailList  = new List<IList<ICell>>();
+
+            // Crate Grid
+            for(var r = 0; r < this.RowCount; r++){
+                var rowList = new List<ICell>();
+                for(var c = 0; c < this.ColCount; c++)
+                    rowList.Add(new Cell());
+                mailList.Add(rowList);
+            }
+
+            return mailList;
         }
         #endregion
     }
