@@ -9,49 +9,14 @@ namespace Ozow.Sorting.Domain.DomainServices.SortAlgo
     {
         public string Sort(string input)
         {             
-            //var arr = input.ToArray();
-            //_quickSortAlgo(arr, 0, input.Length -1);
             return _quicksort(input.ToArray().ToList())
                 .Aggregate<char, StringBuilder>(new StringBuilder(64), (sb,c) => sb.Append(c))
                 .ToString();
         }
 
         /// <summary>
-        /// Quick sort algo taken from: https://gist.github.com/lbsong/6833729
-        /// </summary>        
-        private static void _quickSortAlgo(char[] arr, int start, int end)
-        {
-            if (start >= end)
-            {
-                return;
-            }
-
-            char num = arr[start];
-
-            int i = start, j = end;
-
-            while (i < j)
-            {
-                while (i < j && arr[j] > num)
-                {
-                    j--;
-                }
-
-                arr[i] = arr[j];
-
-                while (i < j && arr[i] < num)
-                {
-                    i++;
-                }
-
-                arr[j] = arr[i];
-            }
-
-            arr[i] = num;
-            _quickSortAlgo(arr, start, i - 1);
-            _quickSortAlgo(arr, i + 1, end);
-        }
-
+        /// Quick sort implementation taken from: https://gist.github.com/lbsong/6833729
+        /// </summary>
         public static List<T> _quicksort<T>(List<T> elements) where T: IComparable {
             if (elements.Count() < 2) 
                 return elements;
