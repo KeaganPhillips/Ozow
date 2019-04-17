@@ -30,6 +30,7 @@ namespace Ozow.GameOfLife.Web.Hubs
             Clients.All.SendAsync("StartGameMsgReceived");
 
             var game = _gameFactory.CreateGame(this, command.RowCount, command.ColumnCount);
+            game.StartGame();
         }
     }
 }

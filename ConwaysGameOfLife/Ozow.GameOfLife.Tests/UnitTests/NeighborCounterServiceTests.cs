@@ -46,7 +46,7 @@ namespace Ozow.GameOfLife.Tests.UnitTests
                 var grid = new GridBuilder()
                                 .WithRows(3)
                                 .WithCols(3)
-                                .WithActive(row: n.row, col: n.col)
+                                .WithActiveCell(row: n.row, col: n.col)
                                 .Build();
                                 
                 // Act
@@ -67,7 +67,7 @@ namespace Ozow.GameOfLife.Tests.UnitTests
             var grid = new GridBuilder()
                             .WithRows(3)
                             .WithCols(3)
-                            .WithActive(row: neighbour1.row, col: neighbour1.col)
+                            .WithActiveCell(row: neighbour1.row, col: neighbour1.col)
                             .WithActive(row: neighbour2.row, col: neighbour2.col)
                             .Build();
                             
@@ -93,7 +93,7 @@ namespace Ozow.GameOfLife.Tests.UnitTests
             var grid = new GridBuilder()
                             .WithRows(3)
                             .WithCols(3)
-                            .WithActive(row: neighbour1.row, col: neighbour1.col)
+                            .WithActiveCell(row: neighbour1.row, col: neighbour1.col)
                             .WithActive(row: neighbour2.row, col: neighbour2.col)
                             .WithActive(row: neighbour3.row, col: neighbour3.col)
                             .Build();

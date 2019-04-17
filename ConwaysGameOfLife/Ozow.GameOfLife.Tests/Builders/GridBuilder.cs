@@ -38,7 +38,7 @@ namespace Ozow.GameOfLife.Tests.Builders
             return this;
         }
 
-        internal GridBuilder WithActive(int row, int col)
+        internal GridBuilder WithActiveCell(int row, int col)
         {
             _activeCells.Add(new Tuple<int,int>(row, col));
             return this;
