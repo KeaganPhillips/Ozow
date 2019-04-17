@@ -19,6 +19,7 @@ namespace Ozow.GameOfLife.Domain.DomainModel
     {
         #region Dependencies
         private readonly IGameEventEmitter _eventEmitter;
+        private readonly IGenerationService _genService;
         #endregion
 
         #region public Properties
@@ -28,9 +29,10 @@ namespace Ozow.GameOfLife.Domain.DomainModel
         #endregion
 
         #region Constructor
-        public GameOfLife(IGameEventEmitter eventEmitter, int rowCount, int columnCount)
+        public GameOfLife(IGameEventEmitter eventEmitter, IGenerationService genService, int rowCount, int columnCount)
         {
             _eventEmitter = eventEmitter;
+            _genService = genService;
 
             this.RowCount = rowCount;
             this.ColCount = columnCount;
@@ -40,13 +42,15 @@ namespace Ozow.GameOfLife.Domain.DomainModel
         #region Public Methods
         public void NextGen()
         {
-            throw new System.NotImplementedException();
+            // Use current game state to get the next game state
+            this.GameState = _genService.NextGeneration(this.GameState);
+            _eventEmitter.NewGameStateEvent(this.GameState);
         }
 
         public void StartGame()
         {
             this.GameState = _crateInitGameState();  
-            _eventEmitter.NewGameStateEvent(this.GameState);
+            _eventEmitter.InitGameStateEvent(this.GameState);
         }
         #endregion
 

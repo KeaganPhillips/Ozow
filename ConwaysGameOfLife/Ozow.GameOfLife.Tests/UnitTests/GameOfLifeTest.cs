@@ -76,23 +76,82 @@ namespace Tests.UnitTests
             // Assert
             eventEmitter
                 .Received(1)
-                .NewGameStateEvent(Arg.Any<IList<IList<ICell>>>());
+                .InitGameStateEvent(Arg.Any<IList<IList<ICell>>>());
         }
         #endregion
 
         #region  Method: NextGen() Test
+        /// <summary>
+        /// The grid returned from the GenerationService becomes the new Game state
+        /// </summary>
         [Test]
-        public void  NextGen_()
+        public void  NextGen_GridReturnedFromGenServiceBecomesNewState()
         {
+            // Arrange
+            var rows = Faker.RandomNumber.Next(2, 10);
+            var cols = Faker.RandomNumber.Next(2, 10);    
+            // Create a dummy grid to be returned by the Generation service
+            var gridToReturn = new GridBuilder()
+                .WithCols(cols)
+                .WithRows(rows)
+                .Build();
+
+            // Creat a stub gen service, give it the grid to return
+            var genService = new GenerationServiceBuilder()
+                .NextGeneration_Returns(gridToReturn)
+                .Build();        
+
+            // Act
+            var sut = _createSubjectUnderTest(rows, cols, genService: genService);
+            sut.StartGame();
+            sut.NextGen();
+
+            // Assert
+            Assert.AreSame(gridToReturn, sut.GameState);
+        }
+
+        /// <summary>
+        /// The grid returned from the GenerationService becomes the new Game state
+        /// </summary>
+        [Test]
+        public void  NextGen_EmitsEventWithNewState()
+        {
+            // Arrange
+            var rows = Faker.RandomNumber.Next(2, 10);
+            var cols = Faker.RandomNumber.Next(2, 10);    
+            // Create a dummy grid to be returned by the Generation service
+            var newGameState = new GridBuilder()
+                .WithCols(cols)
+                .WithRows(rows)
+                .Build();
+
+            // Creat a stub gen service, give it the grid to return
+            var genService = new GenerationServiceBuilder()
+                .NextGeneration_Returns(newGameState)
+                .Build();        
             
+            // Create Event Emitter
+            var eventEmitter = new GameEventEmitterBuilder().Build();
+
+            // Act
+            var sut = _createSubjectUnderTest(rows, cols, genService: genService, eventEmitter: eventEmitter);
+            sut.StartGame();
+            sut.NextGen();
+
+            // Assert
+            eventEmitter
+                .Received(1)
+                .NewGameStateEvent(newGameState);
         }
         #endregion
 
         #region Private Methods
-        private IGameOfLife _createSubjectUnderTest(int rows, int cols, IGameEventEmitter eventEmitter = null)
+        private IGameOfLife _createSubjectUnderTest(int rows, int cols, IGameEventEmitter eventEmitter = null,
+            IGenerationService genService = null)
         {
             eventEmitter = eventEmitter ?? new GameEventEmitterBuilder().Build();
-            return new GameOfLife(eventEmitter, rowCount: rows, columnCount: cols);
+            genService  = genService ?? new GenerationServiceBuilder().Build();
+            return new GameOfLife(eventEmitter, genService, rowCount: rows, columnCount: cols);
         }
         #endregion
 

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Ozow.GameOfLife.Domain.DomainModel;
@@ -19,6 +20,11 @@ namespace Ozow.GameOfLife.Web.Hubs
             _gameFactory = gameFactory;            
         }
 
+        public void InitGameStateEvent(IList<IList<ICell>> state)
+        {
+            Clients.All.SendAsync("InitGameState", state);
+        }
+
         public void NewGameStateEvent(IList<IList<ICell>> state)
         {
 
@@ -31,6 +37,14 @@ namespace Ozow.GameOfLife.Web.Hubs
 
             var game = _gameFactory.CreateGame(this, command.RowCount, command.ColumnCount);
             game.StartGame();
+
+            for(var i=0; i<command.GenCount; i++)
+            {
+                Thread.Sleep(500);
+                game.NextGen();
+            }
+
+            Clients.All.SendAsync("GameOver");
         }
     }
 }

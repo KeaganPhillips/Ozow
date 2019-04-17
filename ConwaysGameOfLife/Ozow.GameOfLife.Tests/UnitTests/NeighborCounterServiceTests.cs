@@ -68,7 +68,7 @@ namespace Ozow.GameOfLife.Tests.UnitTests
                             .WithRows(3)
                             .WithCols(3)
                             .WithActiveCell(row: neighbour1.row, col: neighbour1.col)
-                            .WithActive(row: neighbour2.row, col: neighbour2.col)
+                            .WithActiveCell(row: neighbour2.row, col: neighbour2.col)
                             .Build();
                             
             // Act
@@ -94,8 +94,8 @@ namespace Ozow.GameOfLife.Tests.UnitTests
                             .WithRows(3)
                             .WithCols(3)
                             .WithActiveCell(row: neighbour1.row, col: neighbour1.col)
-                            .WithActive(row: neighbour2.row, col: neighbour2.col)
-                            .WithActive(row: neighbour3.row, col: neighbour3.col)
+                            .WithActiveCell(row: neighbour2.row, col: neighbour2.col)
+                            .WithActiveCell(row: neighbour3.row, col: neighbour3.col)
                             .Build();
                             
             // Act

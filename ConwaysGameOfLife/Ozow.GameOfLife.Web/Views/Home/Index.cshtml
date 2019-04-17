@@ -7,17 +7,17 @@
     <div class="col-md-4" >
         <div class="form-group">
             <label >Rows</label>
-            <input class="form-control" id="rows" placeholder="Row count" value="10" />
+            <input class="form-control" id="rows" placeholder="Row count" value="20" />
             <small class="form-text text-muted">Number of rows in the grid</small>    
         </div>
         <div class="form-group">
             <label >Columns</label>
-            <input class="form-control" id="cols" placeholder="Column count" value="10" />
+            <input class="form-control" id="cols" placeholder="Column count" value="20" />
             <small class="form-text text-muted">Number of columns in the grid</small>    
         </div>
         <div class="form-group">
             <label >Generations</label>
-            <input class="form-control" id="gens" placeholder="Generations" value="15" />
+            <input class="form-control" id="gens" placeholder="Generations" value="5" />
             <small class="form-text text-muted">Number of generations</small>    
         </div>  
         <button type="button" id='btnStartGame' class="btn btn-primary">Start Game</button>
@@ -57,20 +57,30 @@
                 .style("stroke", "#222");
         }
 
-        function handleSigErr(err) {
-            return console.error(err.toString());
-        };
+        function updateGrid(data){   
+            var grid = d3.select("#grid svg");
 
-        function handleStartGameMsgReceived(user, message) {            
+            var row = grid.selectAll(".row")
+                .data(data)                
+                .attr("class", "row");
+                              ;
+            row.selectAll(".square")                
+                .data(function(d) { return d; })
+                .attr("x", function(d) { return d.x; })
+                .attr("y", function(d) { return d.y; })
+                .attr("width", function(d) { return d.width; })
+                .attr("height", function(d) { return d.height; })
+                .style("fill", function(d){ return d.alive ? '#666' : '#fff' })
+                .style("stroke", "#222");
         }
 
-        function handleUpdateGameState(message){            
-            var width = cellSize; 
+        function mapToJsonObject(data){
+           var width = cellSize; 
             var height = cellSize;
 
             var ypos = 0;
             var xpos = 0;
-            var gridData = message.map(function(r){ 
+            return data.map(function(r){ 
                 xpos = 0;
                 ypos += height;
                 return r.map(function(c){                    
@@ -84,16 +94,39 @@
                     };                    
                 });                
             });
+        }
 
+        function handleSigErr(err) {
+            return console.error(err.toString());
+        };
+
+        function handleStartGameMsgReceived(user, message) {            
+        }
+
+        function handleGameOver()
+        {            
+            $('#btnStartGame').prop('disabled', false);            
+        }
+
+        function handleInitGameState(data){                      ;
+            var gridData = mapToJsonObject(data);
             drawGrid(gridData);
+        }
+
+        function handleUpdateGameState(data){                   
+            var gridData = mapToJsonObject(data);                        
+            updateGrid(gridData);
         }
 
         function handleOnClickStartGame(){             
             $(this).prop('disabled', true);
+            $("svg").children().remove();
 
-            var connection = new signalR.HubConnectionBuilder().withUrl("/gameHub").build()
+            var connection = new signalR.HubConnectionBuilder().withUrl("/gameHub").build()            
             connection.on("StartGameMsgReceived", handleStartGameMsgReceived);
+            connection.on("InitGameState", handleInitGameState);
             connection.on("UpdateGameState", handleUpdateGameState);
+            connection.on("GameOver", handleGameOver)
             
 
             connection.start()
@@ -101,7 +134,7 @@
                     var rows = +$('#rows').val();     
                     var cols = +$('#cols').val();
                     var gens = +$('#gens').val();
-                    cellSize = Math.max(gridWidth, gridHeight) / Math.max(rows, cols);
+                    cellSize = Math.max(gridWidth, gridHeight) / Math.max(rows, cols);                    
                     var message = {
                         RowCount: rows ,
                         ColumnCount: cols,
@@ -114,7 +147,7 @@
 
         $(function(){
             //createGrind();
-            $('#btnStartGame').click(handleOnClickStartGame);4
+            $('#btnStartGame').click(handleOnClickStartGame);
 
             // Create Grid
             var grid = d3.select("#grid")
@@ -122,7 +155,7 @@
                 .attr("width", gridWidth + "px")
                 .attr("height", gridHeight + "px")
                 .style("border", "1px solid #666");
-
+            
         });
 
   </script>
