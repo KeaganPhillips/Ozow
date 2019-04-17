@@ -9,6 +9,9 @@ namespace Ozow.GameOfLife.Domain.DomainServices
         int Count(IList<IList<ICell>> grid, int rowNo,int colNo);
     }
 
+    /// <summary>
+    /// Handles logic for couting how many neibours a given cell has
+    /// </summary>
     public class NeighborCounterService : INeighborCounterService
     {
         public int Count(IList<IList<ICell>> grid, int rowNo, int colNo)
@@ -39,7 +42,6 @@ namespace Ozow.GameOfLife.Domain.DomainServices
                     // Don't evaluate cells below the bottom boundry
                     if(r > rowCount)
                         continue;
-
                     
                     var cell = grid.ToList()[r-1].ToList()[c-1];
                     count += (cell.IsAlive ? 1 : 0);

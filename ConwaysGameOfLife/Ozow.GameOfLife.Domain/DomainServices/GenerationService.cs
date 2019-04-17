@@ -10,6 +10,9 @@ namespace Ozow.GameOfLife.Domain.DomainServices
         IList<IList<ICell>> NextGeneration(IList<IList<ICell>> grid);
     }
 
+    /// <summary>
+    /// This class takes as input the current game state, and returns a new game state
+    /// </summary>
     public class GenerationService : IGenerationService
     {
         #region Dependencies

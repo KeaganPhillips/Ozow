@@ -40,17 +40,16 @@ namespace Ozow.GameOfLife.Domain.DomainModel
         #endregion
 
         #region Public Methods
+        public void StartGame()
+        {
+            this.GameState = _crateInitGameState();  
+            _eventEmitter.InitGameStateEvent(this.GameState);
+        }
         public void NextGen()
         {
             // Use current game state to get the next game state
             this.GameState = _genService.NextGeneration(this.GameState);
             _eventEmitter.NewGameStateEvent(this.GameState);
-        }
-
-        public void StartGame()
-        {
-            this.GameState = _crateInitGameState();  
-            _eventEmitter.InitGameStateEvent(this.GameState);
         }
         #endregion
 
@@ -59,7 +58,7 @@ namespace Ozow.GameOfLife.Domain.DomainModel
         {
             var mailList  = new List<IList<ICell>>();
 
-            // Crate Grid
+            // Crate Init grid with random cell alive/dead states
             for(var r = 0; r < this.RowCount; r++){
                 var rowList = new List<ICell>();
                 for(var c = 0; c < this.ColCount; c++)
